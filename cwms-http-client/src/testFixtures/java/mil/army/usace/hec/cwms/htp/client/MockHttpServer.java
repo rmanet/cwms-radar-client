@@ -22,23 +22,42 @@
  * SOFTWARE.
  */
 
-package mil.army.usace.hec.cwms.radar.client.model;
+package mil.army.usace.hec.cwms.htp.client;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
-/**
- *
- */
-public final class RadarObjectMapper {
+public final class MockHttpServer {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+    private final MockWebServer mockWebServer;
 
-    public static <T> T mapJsonToObject(String json, Class<T> classObject) throws IOException {
-        return OBJECT_MAPPER.readValue(json, classObject);
+    private MockHttpServer(MockWebServer mockWebServer) {
+        this.mockWebServer = mockWebServer;
+    }
+
+    public static MockHttpServer create() throws IOException {
+        MockWebServer mockWebServer = new MockWebServer();
+        return new MockHttpServer(mockWebServer);
+    }
+
+    public void enqueue(String body) {
+        mockWebServer.enqueue(new MockResponse().setBody(body));
+    }
+
+    public void enqueue(int responseCode, String body) {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(responseCode).setBody(body));
+    }
+
+    public void shutdown() throws IOException {
+        mockWebServer.shutdown();
+    }
+
+    public int getPort() {
+        return mockWebServer.getPort();
+    }
+
+    public void start() throws IOException {
+        mockWebServer.start();
     }
 }

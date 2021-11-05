@@ -22,23 +22,14 @@
  * SOFTWARE.
  */
 
-package mil.army.usace.hec.cwms.radar.client.model;
+package mil.army.usace.hec.cwms.http.client;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 
-/**
- *
- */
-public final class RadarObjectMapper {
+public class ServerNotFoundException extends IOException {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
-
-    public static <T> T mapJsonToObject(String json, Class<T> classObject) throws IOException {
-        return OBJECT_MAPPER.readValue(json, classObject);
+    public ServerNotFoundException(Throwable throwable) {
+        super(throwable);
     }
+
 }

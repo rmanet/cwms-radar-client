@@ -22,23 +22,16 @@
  * SOFTWARE.
  */
 
-package mil.army.usace.hec.cwms.radar.client.model;
+package mil.army.usace.hec.cwms.radar.client.controllers;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.io.IOException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- *
- */
-public final class RadarObjectMapper {
+import org.junit.jupiter.api.Test;
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+class TestTimeSeriesEndpointInput {
 
-    public static <T> T mapJsonToObject(String json, Class<T> classObject) throws IOException {
-        return OBJECT_MAPPER.readValue(json, classObject);
+    @Test
+    void testNullTimeSeriesId() {
+        assertThrows(NullPointerException.class, () -> new TimeSeriesEndpointInput(null));
     }
 }
