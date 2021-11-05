@@ -36,34 +36,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import mil.army.usace.hec.cwms.htp.client.MockHttpServer;
 import mil.army.usace.hec.cwms.http.client.ApiConnectionInfo;
 import mil.army.usace.hec.cwms.http.client.NoDataFoundException;
 import mil.army.usace.hec.cwms.http.client.ServerNotFoundException;
 import mil.army.usace.hec.cwms.radar.client.model.TimeSeries;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class TestTimeSeriesController {
-
-    private static final String BASE_URL = "http://localhost:11524";
-    private static MockHttpServer mockHttpServer;
-
-    @BeforeEach
-    void setUp() throws IOException {
-        mockHttpServer = MockHttpServer.create();
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        mockHttpServer.shutdown();
-    }
-
-    private ApiConnectionInfo buildConnectionInfo() {
-        String baseUrl = String.format("http://localhost:%s", mockHttpServer.getPort());
-        return new ApiConnectionInfo(baseUrl);
-    }
+class TestTimeSeriesController extends TestController {
 
     @Test
     void testRetrieveTimeSeries() throws IOException {

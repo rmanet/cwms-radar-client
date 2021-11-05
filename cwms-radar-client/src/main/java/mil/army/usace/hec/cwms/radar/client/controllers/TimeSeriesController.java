@@ -35,7 +35,6 @@ public final class TimeSeriesController {
 
     public TimeSeries retrieveTimeSeries(ApiConnectionInfo apiConnectionInfo, TimeSeriesEndpointInput timeSeriesEndpointInput) throws IOException {
         HttpRequestResponse response = new HttpRequestBuilder(apiConnectionInfo, "timeseries")
-            .addQueryHeader("accept", "application/json;version=2")
             .addEndpointInput(timeSeriesEndpointInput)
             .execute();
         return RadarObjectMapper.mapJsonToObject(response.getBody(), TimeSeries.class);
