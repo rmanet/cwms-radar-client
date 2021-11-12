@@ -26,7 +26,6 @@ package mil.army.usace.hec.cwms.http.client;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,30 +41,12 @@ public final class HttpRequestBuilder {
     private final HttpUrl httpUrl;
     private final Map<String, String> queryParameters = new HashMap<>();
     private final Map<String, String> queryHeaders = new HashMap<>();
-    private Duration callTimeout = Duration.ofMinutes(5);
-    private Duration readTimeout = Duration.ofMinutes(5);
-    private Duration connectTimeout = Duration.ofSeconds(5);
 
     public HttpRequestBuilder(ApiConnectionInfo apiConnectionInfo, String endpoint) {
         Objects.requireNonNull(apiConnectionInfo, "API connection info must be defined");
         Objects.requireNonNull(apiConnectionInfo.getApiRoot(), "API root must be defined");
         this.httpUrl = HttpUrl.parse(apiConnectionInfo.getApiRoot());
         this.endpoint = Objects.requireNonNull(endpoint, "Cannot process request against the API root endpoint");
-    }
-
-    public HttpRequestBuilder callTimeout(Duration callTimeout) {
-        this.callTimeout = callTimeout;
-        return this;
-    }
-
-    public HttpRequestBuilder readTimeout(Duration readTimeout) {
-        this.readTimeout = readTimeout;
-        return this;
-    }
-
-    public HttpRequestBuilder connectTimeout(Duration connectTimeout) {
-        this.connectTimeout = connectTimeout;
-        return this;
     }
 
     public HttpRequestBuilder addQueryParameter(String key, String value) {
@@ -83,14 +64,6 @@ public final class HttpRequestBuilder {
         return this;
     }
 
-    private OkHttpClient createClient() {
-        return new OkHttpClient.Builder()
-            .callTimeout(callTimeout)
-            .connectTimeout(readTimeout)
-            .readTimeout(connectTimeout)
-            .build();
-    }
-
     private Request createRequest() throws IOException {
         HttpUrl resolve = httpUrl.resolve(endpoint);
         if (resolve == null) {
@@ -105,10 +78,10 @@ public final class HttpRequestBuilder {
     }
 
     public HttpRequestResponse execute() throws IOException {
-        OkHttpClient client = createClient();
         Request request = createRequest();
         ResponseBody body = null;
         try {
+            OkHttpClient client = OkHttpClientInstance.getInstance();
             Response execute = client.newCall(request).execute();
             if (execute.isSuccessful()) {
                 body = execute.body();
@@ -116,7 +89,8 @@ public final class HttpRequestBuilder {
                     throw new IOException("Error with request, body not returned for request: " + request);
                 }
                 return new HttpRequestResponse(body.string());
-            } else {
+            }
+            else {
                 int code = execute.code();
                 body = execute.body();
                 if (code == 404) {
@@ -124,7 +98,8 @@ public final class HttpRequestBuilder {
                         throw new NoDataFoundException("No data found for request: " + request);
                     }
                     throw new NoDataFoundException("No data found for request: " + request + "\n" + body.string());
-                } else {
+                }
+                else {
                     if (body == null) {
                         throw new IOException(
                             "Unknown error occurred for request: " + request + "\n Error code: " + code + " " + execute.message());
@@ -133,9 +108,11 @@ public final class HttpRequestBuilder {
                         "Unknown error occurred for request: " + request + "\n Error code: " + code + " " + execute.message() + "\n" + body.string());
                 }
             }
-        } catch (ConnectException connectException) {
+        }
+        catch (ConnectException connectException) {
             throw new ServerNotFoundException(connectException);
-        } finally {
+        }
+        finally {
             if (body != null) {
                 body.close();
             }

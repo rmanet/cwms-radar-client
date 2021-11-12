@@ -33,8 +33,11 @@ import mil.army.usace.hec.cwms.radar.client.model.TimeSeries;
 
 public final class TimeSeriesController {
 
+    private static final String TIME_SERIES_ENDPOINT = "timeseries";
+
     public TimeSeries retrieveTimeSeries(ApiConnectionInfo apiConnectionInfo, TimeSeriesEndpointInput timeSeriesEndpointInput) throws IOException {
-        HttpRequestResponse response = new HttpRequestBuilder(apiConnectionInfo, "timeseries")
+        HttpRequestResponse response = new HttpRequestBuilder(apiConnectionInfo, TIME_SERIES_ENDPOINT)
+            .addQueryHeader("accept", "application/json;version=2")
             .addEndpointInput(timeSeriesEndpointInput)
             .execute();
         return RadarObjectMapper.mapJsonToObject(response.getBody(), TimeSeries.class);
